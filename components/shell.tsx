@@ -90,8 +90,8 @@ export function Header() {
   }
 
   return <>
-    <div className="announcement"><span>STOREFRONT DEMO</span><span className="announcement-dot" />Explore the CraftPixel collection <Link href="/shop/" aria-label="Explore the collection"><ArrowRight size={14} /></Link></div>
-    <header className="site-header">
+    <div className="announcement" data-reveal><span>STOREFRONT DEMO</span><span className="announcement-dot" />Explore the CraftPixel collection <Link href="/shop/" aria-label="Explore the collection"><ArrowRight size={14} /></Link></div>
+    <header className="site-header" data-reveal>
       <div className="header-inner">
         <button className="icon-button menu-button" type="button" aria-label={menu ? 'Close menu' : 'Open menu'} aria-expanded={menu} aria-controls="mobile-menu" onClick={() => setMenu(!menu)}>{menu ? <X /> : <Menu />}</button>
         <nav className="primary-nav" aria-label="Main navigation">
@@ -100,8 +100,8 @@ export function Header() {
         <Brand />
         <div className="header-actions">
           <button className="icon-button" type="button" aria-label="Search products" onClick={() => setSearch(true)}><Search size={20} /></button>
-          <Link className="icon-button header-wishlist" href="/wishlist/" aria-label={`Wishlist, ${saved.length} items`}><Heart size={20} /></Link>
-          <Link className="icon-button bag-link" href="/cart/" aria-label={`Bag, ${bag.length} items`}><ShoppingBag size={20} /><span>{bag.length}</span></Link>
+          <Link className="icon-button header-wishlist" href="/wishlist/" aria-label={`Wishlist, ${saved.length} ${saved.length === 1 ? 'item' : 'items'}`}><Heart size={20} /></Link>
+          <Link className="icon-button bag-link" href="/cart/" aria-label={`Bag, ${bag.length} ${bag.length === 1 ? 'item' : 'items'}`}><ShoppingBag size={20} /><span>{bag.length}</span></Link>
         </div>
       </div>
       <nav className={'mobile-nav' + (menu ? ' mobile-nav-open' : '')} id="mobile-menu" aria-label="Mobile navigation" inert={!menu}>
@@ -125,15 +125,14 @@ export function Motion() {
     const nodes = new Set<Element>();
     const observer = new IntersectionObserver((entries) => {
       for (const entry of entries) {
-        const leavingAbove = entry.boundingClientRect.bottom <= 0;
-        const leavingBelow = entry.boundingClientRect.top >= window.innerHeight;
+        const leavingAbove = entry.boundingClientRect.bottom <= (entry.rootBounds?.top ?? 0);
         if (entry.isIntersecting) {
           entry.target.setAttribute('data-motion', 'visible');
-        } else if (leavingAbove || leavingBelow) {
+        } else {
           entry.target.setAttribute('data-motion', leavingAbove ? 'above' : 'below');
         }
       }
-    });
+    }, { rootMargin: '-30px 0px -30px 0px' });
     function scan() {
       for (const node of nodes) {
         if (!node.isConnected) { observer.unobserve(node); nodes.delete(node); }
@@ -141,7 +140,8 @@ export function Motion() {
       document.querySelectorAll('[data-reveal]').forEach((node) => {
         if (nodes.has(node)) return;
         const rect = node.getBoundingClientRect();
-        node.setAttribute('data-motion', rect.top >= window.innerHeight ? 'below' : 'visible');
+        const position = rect.bottom <= 30 ? 'above' : rect.top >= window.innerHeight - 30 ? 'below' : 'visible';
+        node.setAttribute('data-motion', position);
         observer.observe(node);
         nodes.add(node);
       });

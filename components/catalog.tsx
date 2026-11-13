@@ -17,13 +17,11 @@ const slides = [
 
 export function Hero() {
   const [active, setActive] = useState(0);
-  const [shown, setShown] = useState<number[]>([0]);
   function select(index: number) {
     const target = (index + slides.length) % slides.length;
     setActive(target);
-    setShown((previous) => previous.includes(target) ? previous : [...previous, target]);
   }
-  return <section className={'hero hero-' + slides[active].color} aria-roledescription="carousel" aria-label="Featured collections" onKeyDown={(event) => {
+  return <section className={'hero hero-' + slides[active].color} aria-roledescription="carousel" aria-label="Featured collections" data-reveal onKeyDown={(event) => {
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       event.preventDefault();
       select(active + (event.key === 'ArrowRight' ? 1 : -1));
@@ -38,7 +36,7 @@ export function Hero() {
           <Link className="button button-dark" href={'/shop/?category=' + slide.category}>{slide.action}<ArrowUpRight size={17} /></Link>
         </div>
         <div className="hero-image">
-          {shown.includes(index) && <Image src={art(slide.image)} alt={slide.alt} fill preload={index === 0} sizes="(max-width: 760px) 100vw, 58vw" />}
+          <Image src={art(slide.image)} alt={slide.alt} fill preload={index === 0} loading={index === 0 ? undefined : 'eager'} fetchPriority={index === 0 ? undefined : 'low'} sizes="(max-width: 760px) 100vw, 58vw" />
         </div>
       </div>)}
     </div>
